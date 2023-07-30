@@ -1,0 +1,10 @@
+venv
+.idea
+.vscode
+**/*.pyc
+**/*__pycache__
+**/participants.xlsx
+**/trainings.xlsx
+build/**
+dist/**
+defaults/**
