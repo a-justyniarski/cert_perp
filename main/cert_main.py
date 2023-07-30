@@ -7,6 +7,9 @@ from pylatex.utils import bold
 
 from customs.func import transform_polish_char_to_latex, insert_text_font_f, recognize_sex, format_date
 from customs.const import ExcelStructure
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class CertPrepMain:
@@ -33,7 +36,7 @@ class CertPrepMain:
 			scope_of_training_list='',
 			person_authorized='',
 			title_person_authorized='',
-			certificate_no='TEST/2022',
+			cert_ident='TEST/2022',
 			policy_statement_text=_policy_statement_text,
 			**kwargs
 	):
@@ -57,7 +60,7 @@ class CertPrepMain:
 		self.policy_statement_text = kwargs.get('policy_statement_text') or policy_statement_text
 		self.person_authorized = kwargs.get('person_authorized') or person_authorized
 		self.title_person_authorized = kwargs.get('title_person_authorized') or title_person_authorized
-		self.certificate_no = kwargs.get('certificate_no') if not NaN else certificate_no
+		self.certificate_no = kwargs.get('certificate_no') if not NaN else cert_ident
 		self.sex = recognize_sex(self.name)
 		self.header_block_offset = 0
 		self.name_block_offset = 0

@@ -7,4 +7,4 @@ venv
 **/trainings.xlsx
 build/**
 dist/**
-defaults/**
+**/defaults/**

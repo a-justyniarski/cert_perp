@@ -52,10 +52,10 @@ class ExcelManipulation:
 				continue
 			try:
 				participant.update(trainings.get(participant.get(training_col_name).lower()))
+				data.append(participant)
 			except TypeError:
 				pass
-			data.append(participant)
-			logger.info(participant)
+
 		data.sort(key=lambda x: x.get('id'))
 		return data
 
