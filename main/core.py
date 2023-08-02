@@ -18,17 +18,19 @@ def generate_single_certificate(data, certificate_class):
 		logger.error(f"{e!r}", exc_info=True)
 
 
-def generate_pdfs(data: list, certificate_class, test: bool = False, id_: int | tuple = None):
+def generate_pdfs(data: list, certificate_class, choice: bool = False, id_: int | tuple | list = None):
 	if (
-			test
+			choice
 			and (
 				not id_
-				or (id_ > len(data) if isinstance(id_, int) else id_[1] > len(data))
-				or (id_ < 0 if isinstance(id_, int) else id_[1] < 0)
+				or (isinstance(id_, tuple) and id_[1] > len(data))
+				or (isinstance(id_, tuple) and min(id_) < 0)
+				or (isinstance(id_, list) and max(id_) > len(data))
+				or (isinstance(id_, list) and min(id_) < 0)
 			)
 	):
 		raise ValueError(f'Invalid row id: {id_}')
-	if test:
+	if choice:
 		if isinstance(id_, int):
 			idx_test = data.index(next(filter(lambda x: x.get('id') == float(id_), data), 1))
 			data = data[idx_test: idx_test+1]
@@ -36,6 +38,8 @@ def generate_pdfs(data: list, certificate_class, test: bool = False, id_: int | 
 			idx_start = data.index(next(filter(lambda x: x.get('id') == float(id_[0]), data)))
 			idx_stop = data.index(next(filter(lambda x: x.get('id') == float(id_[1]), data)))
 			data = data[idx_start: idx_stop+1]
+		elif isinstance(id_, list):
+			data = list(filter(lambda x: x.get('id') in {float(num) for num in id_}, data))
 	prog_start = time.perf_counter()
 	for idx, d in enumerate(data, start=1):
 		start = time.perf_counter()
@@ -50,4 +54,4 @@ def generate_pdfs(data: list, certificate_class, test: bool = False, id_: int | 
 
 if __name__ == '__main__':
 	# generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain)
-	generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain, test=True, id_=423)
+	generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain, choice=True, id_=[328, 363, 367, 369, 371, 372, 175])
