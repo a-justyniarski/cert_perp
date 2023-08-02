@@ -18,13 +18,24 @@ def generate_single_certificate(data, certificate_class):
 		logger.error(f"{e!r}", exc_info=True)
 
 
-def generate_pdfs(data: list, certificate_class, test: bool = False, id_: int = None):
-	if test and (not id_ or id_ > len(data) or id_ < 0):
-		logger.debug(data)
+def generate_pdfs(data: list, certificate_class, test: bool = False, id_: int | tuple = None):
+	if (
+			test
+			and (
+				not id_
+				or (id_ > len(data) if isinstance(id_, int) else id_[1] > len(data))
+				or (id_ < 0 if isinstance(id_, int) else id_[1] < 0)
+			)
+	):
 		raise ValueError(f'Invalid row id: {id_}')
 	if test:
-		idx_test = data.index(next(filter(lambda x: x.get('id') == float(id_), data), 1))
-		data = data[idx_test: idx_test+1]
+		if isinstance(id_, int):
+			idx_test = data.index(next(filter(lambda x: x.get('id') == float(id_), data), 1))
+			data = data[idx_test: idx_test+1]
+		elif isinstance(id_, tuple):
+			idx_start = data.index(next(filter(lambda x: x.get('id') == float(id_[0]), data)))
+			idx_stop = data.index(next(filter(lambda x: x.get('id') == float(id_[1]), data)))
+			data = data[idx_start: idx_stop+1]
 	prog_start = time.perf_counter()
 	for idx, d in enumerate(data, start=1):
 		start = time.perf_counter()
@@ -38,6 +49,5 @@ def generate_pdfs(data: list, certificate_class, test: bool = False, id_: int = 
 
 
 if __name__ == '__main__':
-	generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain)
-	# generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain, test=True, id_=422)
-
+	# generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain)
+	generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain, test=True, id_=423)

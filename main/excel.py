@@ -51,10 +51,12 @@ class ExcelManipulation:
 			if not isinstance(participant.get(training_col_name), str):
 				continue
 			try:
-				participant.update(trainings.get(participant.get(training_col_name).lower()))
+				participant.update(trainings.get(participant.get(training_col_name).lower().strip()))
 				data.append(participant)
-			except TypeError:
-				pass
+			except TypeError as e:
+				logger.debug(participant.get(training_col_name).lower())
+				# logger.debug(trainings.keys())
+				logger.error(f"{e!r}: {e}")
 
 		data.sort(key=lambda x: x.get('id'))
 		return data
