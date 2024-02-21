@@ -1,0 +1,1 @@
+python -m flask --env-file local.env --app .\main\flask_app.py db migrate -m %1 --directory .\main\migrations_test && python -m flask --env-file local.env --app .\main\flask_app.py db upgrade --directory .\main\migrations_test

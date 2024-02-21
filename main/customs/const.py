@@ -1,3 +1,4 @@
+import glob
 import os
 
 
@@ -16,9 +17,30 @@ class ExcelStructure:
 
 
 class Directories:
-	participants_excel_file_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'files', 'participants.xlsx')
-	trainings_excel_file_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'files', 'trainings.xlsx')
+	participants_excel_file_dir = os.path.join(
+		os.path.dirname(os.path.dirname(__file__)),
+		'files',
+		glob.glob(
+			os.path.join(
+				os.path.dirname(os.path.dirname(__file__)),
+				'files',
+				'participants*'
+			)
+		)[0]
+	)
+	trainings_excel_file_dir = os.path.join(
+		os.path.dirname(os.path.dirname(__file__)),
+		'files',
+		glob.glob(
+			os.path.join(
+				os.path.dirname(os.path.dirname(__file__)),
+				'files',
+				'trainings*'
+			)
+		)[0]
+	)
 
+	print(participants_excel_file_dir, trainings_excel_file_dir, sep=' ')
 
 class Translators:
 	POLISH_CHARS_TO_LATEX = {

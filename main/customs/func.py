@@ -25,7 +25,6 @@ def insert_text_font_f(s: str, fontsize: str, relative_font_size: str = "12", di
 		f"{{\\fontsize{{{fontsize+dimension}}}{{{relative_font_size+dimension}}}\\selectfont {s}}}"
 	)
 
-
 def recognize_sex(name: str):
 	if name.endswith('a') and name not in Exceptions.MALE_NAMES_EXCEPTIONS:
 		return 'f'

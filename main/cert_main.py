@@ -16,12 +16,12 @@ class CertPrepMain:
 	_header: str = 'Zaświadczenie'
 	_subheader: str = 'Zaświadcza się, że {}'
 	_birth_text: str = 'ur. {}, {}'
-	_header_training: str = 'ukończył{} szkolenie:'
+	_header_training: str = 'uczestniczył{suffix} w szkoleniu:'
 	_policy_statement_text: str = """Zaświadczenie nr 10/2020 o wpisie Niepublicznej Placówki Doskonalenia Nauczycieli 
 	Instytut Educare, do ewidencji niepublicznych placówek doskonalenia nauczycieli mających siedzibę na terenie 
 	województwa śląskiego z dnia 23.09.2020 r. pod numerem 9"""
-	_training_scope_header: str = 'Zakres szkolenia'
-	_title_person_authorised: str = transform_polish_char_to_latex('Dyrektor ds. kształcenia')
+	_training_scope_header: str = 'Zakres szkolenia:'
+	_title_person_authorised: str = transform_polish_char_to_latex('Dyrektor NPDN Instytut Educare')
 	_person_authorised: str = transform_polish_char_to_latex('Elżbieta Wagner')
 
 	def __init__(
@@ -163,20 +163,49 @@ class CertPrepMain:
 			Package('textpos', options=["absolute", "overlay"]),
 			Package('csquotes', options="autostyle"),
 			Package('babel'),
+			Package('fontspec'),
+			# Package('geometry', options='a4paper'),
+			# Package('helvet', options=["scaled"]),
 		]
 
 		for package in packages:
 			self.document.packages.append(package)
 
+		self.document.preamble.append(Command('usepackage', 'background'))
+		self.document.preamble.append(NoEscape(r'\setmainfont{Corbel}'))
+		self.document.preamble.append(NoEscape(r'\setquotestyle{american}'))
+		# self.document.preamble.append(Command('\renewcommand*\\familydefault', 'sfdefault'))
+
 	def set_background(self, bg_path=None):
 		if not bg_path:
 			bg_path = 'background.jpg'
-		# bg_path = 'background.png'
-		bg_img = StandAloneGraphic(filename=bg_path, image_options=NoEscape(r"width=\paperwidth,height=\paperheight"))
-		self.document.append(
-			NoEscape(
-				f"\\tikz[remember picture,overlay] \\node at (current page.center) {{{bg_img.dumps()}}};"
-			)
+		background_image_path = 'D:/python_projects/certificate_prep/main/images/background.jpg'
+
+		# background_setup = fr'''
+		# 	\backgroundsetup{{
+		# 		scale=1,
+		# 		angle=0,
+		# 		opacity=1,
+		# 		position=current page.center,
+		# 		contents={{\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{{{background_image_path}}}}}
+		# 	}}
+		# '''
+		background_setup = fr"""
+			\backgroundsetup{{
+			scale=1,
+			color=black,
+			opacity=1,
+			angle=0,
+			position=current page.south,
+			vshift=-11.9cm,
+			hshift=-2.2cm,
+			contents={{%
+			\includegraphics[width=\paperwidth,height=\paperheight]{{{background_image_path}}}
+			}}%
+			}}
+		"""
+		self.document.preamble.append(
+			NoEscape(background_setup)
 		)
 
 	def append_header(
@@ -248,12 +277,14 @@ class CertPrepMain:
 		self.document.append(birth_block)
 
 	def append_training_header(
-			self, text: str = _header_training, font_size: float = 15, width: float = 20,
-			vertical_pos: float = 12, horizontal_pos: float = 0,
+			self, text: str = _header_training, format_: dict = None,
+			font_size: float = 15, width: float = 20, vertical_pos: float = 12, horizontal_pos: float = 0,
 	) -> None:
+		if not format_:
+			format_ = {"suffix": 'a' if self.sex == 'f' else ''}
 		training_h_font_size = str(font_size)
 		try:
-			text = text.format('a' if self.sex == 'f' else '')
+			text = text.format(**format_)
 		except IndexError:
 			text = text
 		text = bold(text)
@@ -264,7 +295,7 @@ class CertPrepMain:
 
 	def append_training_name(
 			self, training_title: str = None, quotes: bool = True, font_size: float = 25, width: float = 20,
-			vertical_pos: float = 13.2, horizontal_pos: float = 0,
+			vertical_pos: float = 13.2, horizontal_pos: float = 0.5,
 	) -> None:
 		training_name_font_size = str(font_size)
 		if not training_title:
@@ -272,7 +303,7 @@ class CertPrepMain:
 		if quotes:
 			training_title = f'\\enquote{{{bold(training_title)}}}'
 		else:
-			training_title = bold(training_title)
+			training_title = bold(training_title, escape=False)
 		training_name_block = TextBlock(width=width, vertical_pos=vertical_pos, horizontal_pos=horizontal_pos)
 		training_name_block.append(Command('centering'))
 		training_name_block.append(insert_text_font_f(training_title, training_name_font_size))
@@ -280,7 +311,7 @@ class CertPrepMain:
 
 	def append_training_date(
 			self, training_date_list: list = None, training_date_text: str = None, training_duration: float = None,
-			font_size: float = 12, width: float = 20, vertical_pos: float = 15, horizontal_pos: float = 0,
+			font_size: float = 12, width: float = 20, vertical_pos: float = 16, horizontal_pos: float = 0,
 	) -> None:
 		if not training_date_list:
 			training_date_list = self.training_date_list
@@ -292,8 +323,8 @@ class CertPrepMain:
 		training_date_list_text = ", ".join(training_date_list)
 		if not training_date_text:
 			training_date_text = f'w {"dniach" if len(training_date_list) > 1 else "dniu"} {training_date_list_text}, ' \
-								 f'w wymiarze {int(training_duration) if training_duration.is_integer() else training_duration} ' \
-								 f'{"godziny" if training_duration == 1 else "godzin"}'
+								 f'w wymiarze {int(training_duration) if float(training_duration).is_integer() else str(training_duration).replace(".", ",")} ' \
+								 f'{"godziny" if training_duration == 1 or training_duration % 1 else "godzin"}'
 
 		training_date_block.append(insert_text_font_f(training_date_text, training_date_font_size))
 		self.document.append(training_date_block)
@@ -360,22 +391,32 @@ class CertPrepMain:
 		certificate_no_block.append(certificate_no_l_align)
 		self.document.append(certificate_no_block)
 
+	def append_sign(self):
+		image_path = 'D:/python_projects/certificate_prep/main/images/sign.png'
+		image_position = NoEscape(fr'''
+			\begin{{textblock}}{{1}}(6.5,26.5)
+			\includegraphics[scale=1]{{{image_path}}}
+			\end{{textblock}}
+		''')
+		self.document.append(image_position)
+
 	def prepare_certificate_pdf(self):
 		self.prepare_preamble()
-		# self.set_background()
-		self.append_header()
+		self.set_background(bg_path='background.jpg')
+		self.append_header(font_size=60, horizontal_pos=0.5)
 		self.append_underline()
-		self.append_subheader()
-		self.append_name()
+		self.append_subheader(vertical_pos=7.5)
+		self.append_name(font_size=30, vertical_pos=9)
 		self.append_birthday()
 		self.append_training_header()
-		self.append_training_name()
-		self.append_training_date()
+		self.append_training_name(vertical_pos=13.2, width=16, horizontal_pos=2.5, quotes=False)
+		self.append_training_date(vertical_pos=15.8)
 		self.append_training_scope_header()
 		self.append_training_scope()
 		self.append_policy_statement()
 		self.append_sign_space()
 		self.append_certificate_no()
+		self.append_sign()
 
 	def generate_pdf(self):
 		self.prepare_certificate_pdf()
@@ -385,5 +426,6 @@ class CertPrepMain:
 			pass
 		# print(self.document.dumps())
 		self.document.generate_pdf(
-			f'defaults/{self.name.lower()}_{self.surname.lower()}_{self.certificate_no.replace("/", "_")}'
+			f'defaults/{self.name.lower()}_{self.surname.lower()}_{self.certificate_no.replace("/", "_")}',
+			compiler='lualatex'
 		)

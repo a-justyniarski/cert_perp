@@ -42,3 +42,4 @@ class TextBlock(Environment):
 		string += Command('end', self.latex_name).dumps()
 
 		return string
+

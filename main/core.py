@@ -1,3 +1,4 @@
+import sys
 import time
 
 from cert_general import CertPrepGeneral
@@ -53,5 +54,19 @@ def generate_pdfs(data: list, certificate_class, choice: bool = False, id_: int 
 
 
 if __name__ == '__main__':
-	# generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain)
-	generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain, choice=True, id_=[328, 363, 367, 369, 371, 372, 175])
+	ids = list(range(58, 97))
+	# ids = [318, 264]
+	id_sys = int(sys.argv[1]) if len(sys.argv) == 2 else None
+	mult_ids = list(range(int(sys.argv[1]), int(sys.argv[2])+1)) if len(sys.argv) > 2 else None
+
+	#
+	if id_sys:
+		print(f"Generating certificate for id: {id_sys}")
+		generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain, choice=True, id_=id_sys)
+	elif mult_ids:
+		print(f"Generating certificate for id range: {sys.argv[1]}: {sys.argv[2]}")
+		generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain, choice=True, id_=mult_ids)
+	else:
+		print("Generating all certificates")
+		generate_pdfs(excel_manipulation.prepare_data(), CertPrepMain)
+

@@ -31,7 +31,7 @@ class ExcelManipulation:
 					continue
 				training[1]['zakres_szkolenia'] = [i for i in training[1]['zakres_szkolenia'].split(';') if i != '']
 				training[1]['data'] = [i for i in training[1]['data'].split(';') if i != '']
-				trainings_dict.update({training[1].get('nazwa_szkolenia').lower(): training[1].to_dict()})
+				trainings_dict.update({training[1].get('nazwa_szkolenia').lower().strip(): training[1].to_dict()})
 			return trainings_dict
 		except FileNotFoundError as e:
 			logger.error(e)
@@ -55,7 +55,7 @@ class ExcelManipulation:
 				data.append(participant)
 			except TypeError as e:
 				logger.debug(participant.get(training_col_name).lower())
-				# logger.debug(trainings.keys())
+				# logger.debug(trainings)
 				logger.error(f"{e!r}: {e}")
 
 		data.sort(key=lambda x: x.get('id'))
